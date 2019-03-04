@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理-登陆</title>
+    <link rel="stylesheet" th:href="@{https://heerey525.github.io/layui-v2.4.3/layui-v2.4.5/css/layui.css}">
+    <link rel="stylesheet" th:href="@{css/login.css}">
+
+    <style>
+        .admin-header {
+            text-align: center;
+            font-size: 28px;
+            font-family: '微软雅黑';
+            font-weight: 100;
+            color: #fff;
+        }
+
+        .a-button {
+            width: 300px;
+            margin-top: 10px;
+        }
+
+        body {
+            background-image: url("images/bj.jpg");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <div></div>
+    <div class="admin-login-background">
+        <div class="admin-header">
+
+            微商管理系统
+
+        </div>
+        <form class="layui-form" method="post" action="#">
+            <div>
+                <i class="layui-icon layui-icon-username admin-icon admin-icon-username"></i>
+                <input type="text" name="username" placeholder="请输入用户名"
+                       id="username"
+                       autocomplete="off"
+                       class="layui-input admin-input admin-input-username">
+            </div>
+            <div>
+                <i class="layui-icon layui-icon-password admin-icon admin-icon-password"></i>
+                <input type="password" name="password" id="password"
+                       placeholder="请输入密码"
+                       autocomplete="off"
+                       class="layui-input admin-input">
+            </div>
+
+
+            <!--<div>-->
+            <!--<input type="text" name="code"-->
+            <!--id="code"-->
+            <!--placeholder="请输入验证码"-->
+            <!--autocomplete="off"-->
+            <!--class="layui-input admin-input admin-input-verify">-->
+            <!--<img class="admin-captcha codeimg" id="codeimg"-->
+            <!--src="/admin/code.action"-->
+            <!--onclick="updateVerify()">-->
+            <!--</div>-->
+
+
+            <div>
+                <div id="captcha2">
+                    <p id="wait2" class="show">正在加载验证码......</p>
+                </div>
+            </div>
+            <br>
+            <a id="submit2" class="layui-btn a-button" href="javascript:void(0);">登陆</a>
+
+        </form>
+    </div>
+</div>
+<script src="https://heerey525.github.io/layui-v2.4.3/layui-v2.4.5/layui.js"></script>
+<script src="http://apps.bdimg.com/libs/jquery/1.9.1/jquery.js"></script>
+<script src="js/gt.js"></script>
+<script>
+
+
+
+
+     var handler2 = function (captchaObj) {
+         $("#submit2").click(function (e) {
+
+             var username = $("#username").val();
+             var password = $("#password").val();
+             if (username == null || username == "") {//判断用户名是否输入
+                 alert("用户名不能为空");
+                 return false;
+             }
+             if (password == null || password == "") {//判断密码是否输入
+                 alert("密码不能为空");
+                 return false;
+             }
+
+             var result = captchaObj.getValidate();
+             if (!result) {
+                 layui.use(['layer','form'], function(){
+                     layer.open({
+                         title: '提示信息',
+                         content: '当前元素尚未验证，请验证后在登陆' //这里content是一个普通的String
+                     });
+                 });
+
+             } else {
+                 $.ajax({
+                     url: '/login/verifyLogin',
+                     type: 'POST',
+                     dataType: 'json',
+                     data: {
+                         username: username,
+                         password: password,
+                         geetest_challenge: result.geetest_challenge,
+                         geetest_validate: result.geetest_validate,
+                         geetest_seccode: result.geetest_seccode
+                     },
+                     success: function (data) {
+                         if (data.status === 'success') {
+                             window.location.href = "/user/gotoIndex"
+                         } else if (data.status === 'fail') {
+
+                             var flag=1;
+                             layui.use(['layer','form'], function(){
+
+                                 layer.open({
+                                     title: '提示信息',
+                                     content: '输入的账户或是密码错误' //这里content是一个普通的String
+                                 });
+                                 flag =2;
+                             });
+                            if (flag=2) {
+                                $('#username').val('');
+                                $('#password').val('');
+                                captchaObj.reset();
+                                $('#username').focus();
+                            }
+
+                         }
+                     }
+                 })
+             }
+             e.preventDefault();
+         });
+         // 将验证码加到id为captcha的元素里，同时会有三个input的值用于表单提交
+         captchaObj.appendTo("#captcha2");
+         captchaObj.onReady(function () {
+             $("#wait2").hide();
+         });
+         // 更多接口参考：http://www.geetest.com/install/sections/idx-client-sdk.html
+     };
+     $.ajax({
+         url: "/gt/startCaptcha?t=" + (new Date()).getTime(), // 加随机数防止缓存
+         type: "get",
+         dataType: "json",
+         success: function (data) {
+             // 调用 initGeetest 初始化参数
+             // 参数1：配置参数
+             // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它调用相应的接口
+             initGeetest({
+                 gt: data.gt,
+                 challenge: data.challenge,
+                 new_captcha: data.new_captcha, // 用于宕机时表示是新验证码的宕机
+                 offline: !data.success, // 表示用户后台检测极验服务器是否宕机，一般不需要关注
+                 product: "popup", // 产品形式，包括：float，popup
+                 width: "100%"
+                 // 更多配置参数请参见：http://www.geetest.com/install/sections/idx-client-sdk.html#config
+             }, handler2);
+         }
+     });
+
+
+
+
+
+</script>
+</body>
+</html>
