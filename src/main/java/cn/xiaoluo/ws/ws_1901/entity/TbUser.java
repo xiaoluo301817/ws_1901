@@ -36,4 +36,7 @@ public class TbUser implements Serializable {
 
     private String status;
 
+
+    private  String email;
+
 }

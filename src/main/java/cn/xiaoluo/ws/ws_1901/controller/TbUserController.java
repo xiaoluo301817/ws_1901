@@ -103,8 +103,37 @@ public class TbUserController {
      *
      * @return
      */
+//    @GetMapping(value = "getPageDataList")
+//    public  @ResponseBody PageData getPageDataList(Integer page,Integer limit,String username){
+//
+//
+//        System.out.println(username);
+//
+//        PageData pageData =new PageData();
+//
+//        PageParam pageParam =new PageParam();
+//
+//        if (page !=null)pageParam.setPageNo(page);
+//        if (limit !=null)pageParam.setPageSize(limit);
+//        PageInfo<TbUser> pageInfo = userService.findPage(pageParam);
+//        pageData.setCode(0);
+//        pageData.setMsg("1");
+//        pageData.setCount(pageInfo.getTotal());
+//        pageData.setData(pageInfo.getList());
+//
+//        return  pageData;
+//    }
+
+
+
+
     @GetMapping(value = "getPageDataList")
-    public  @ResponseBody PageData getPageDataList(Integer page,Integer limit){
+    public  @ResponseBody PageData getPageDataList(Integer page,Integer limit,String username){
+
+        TbUser user =new TbUser();
+        if (username !=null){
+            user.setUsername(username);
+        }
 
         PageData pageData =new PageData();
 
@@ -112,7 +141,10 @@ public class TbUserController {
 
         if (page !=null)pageParam.setPageNo(page);
         if (limit !=null)pageParam.setPageSize(limit);
-        PageInfo<TbUser> pageInfo = userService.findPage(pageParam);
+
+        PageInfo<TbUser> pageInfo =null;
+        pageInfo =(user.getUsername() ==null)?userService.findPage(pageParam):
+                                    userService.findPage(user,pageParam);
         pageData.setCode(0);
         pageData.setMsg("1");
         pageData.setCount(pageInfo.getTotal());
@@ -120,5 +152,4 @@ public class TbUserController {
 
         return  pageData;
     }
-
 }

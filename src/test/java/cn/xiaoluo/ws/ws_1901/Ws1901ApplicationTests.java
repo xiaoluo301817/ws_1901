@@ -28,8 +28,10 @@ public class Ws1901ApplicationTests {
         PageParam pageParam =new PageParam();
         pageParam.setPageNo(1);
         pageParam.setPageSize(10);
-        PageInfo<TbUser> page = userService.findPage(pageParam);
-        System.out.println(page);
+        PageInfo<TbUser> page = userService.findPage(user,pageParam);
+         for (TbUser tbUser: page.getList()) {
+             System.out.println(tbUser);
+        }
 
 
     }

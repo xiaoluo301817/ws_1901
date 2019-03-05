@@ -91,4 +91,19 @@ public class TbUserServiceImpl implements TbUserService {
         PageInfo pageInfo =new PageInfo(tbUsers);
         return pageInfo;
     }
+
+    @Override
+    public PageInfo<TbUser> findPage(TbUser user, PageParam pageParam) {
+        PageHelper.startPage(pageParam.getPageNo(), pageParam.getPageSize());
+        TbUserExample  example =new TbUserExample();
+        TbUserExample.Criteria criteria = example.createCriteria();
+        if (user !=null){
+            if (user.getUsername() !=null && !"".equals(user.getUsername())){
+                criteria.andUsernameLike("%"+user.getUsername()+"%");
+            }
+        }
+        List<TbUser> tbUsers = tbUserMapper.selectByExample(example);
+        PageInfo pageInfo =new PageInfo(tbUsers);
+        return pageInfo;
+    }
 }

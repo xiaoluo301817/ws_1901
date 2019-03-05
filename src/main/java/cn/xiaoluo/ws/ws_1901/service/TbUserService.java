@@ -119,6 +119,11 @@ public interface TbUserService {
 	public PageInfo<TbUser> findPage(PageParam pageParam);
 
 
-
-
+	/**
+	 *
+	 * @param user    根据传入的实体类和分页数据条
+	 * @param pageParam
+	 * @return
+	 */
+	public PageInfo<TbUser> findPage(TbUser user,PageParam pageParam);
 }
